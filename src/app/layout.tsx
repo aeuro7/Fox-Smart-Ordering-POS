@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sarabun } from "next/font/google";
 import "./globals.css";
+import { Providers } from './providers';
 
 const sarabun = Sarabun({
   subsets: ['thai'],
@@ -22,7 +23,9 @@ export default function RootLayout({
     <html lang="th">
       <body className={`${sarabun.variable} font-sarabun`}>
         {/* <Navbar /> */}
-        <main>{children}</main>
+        <Providers>
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );

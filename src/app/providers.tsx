@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { app, analytics } from '@/lib/firebase';
+import { OrderProvider } from './order/OrderContext';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -9,8 +10,8 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <>
+    <OrderProvider>
       {children}
-    </>
+    </OrderProvider>
   );
 } 
