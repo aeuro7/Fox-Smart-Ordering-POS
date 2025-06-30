@@ -3,16 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { useOrderContext } from '../OrderContext';
 import { ShoppingCartIcon, XIcon, CheckIcon } from '../../components/IconComponents';
 import { useRouter } from 'next/navigation';
+import { db } from '../../firebase/config';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
 
 const OrderSummaryPage = () => {
   const { orderSummary } = useOrderContext();
   const router = useRouter();
   
-  // State สำหรับข้อมูลการจัดส่ง
   const [deliveryInfo, setDeliveryInfo] = useState({
-    storeName: '',
+    customerName: '',
     phoneNumber: '',
-    address: ''
+    address: '',
+    deliveryDate: ''
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,6 +25,21 @@ const OrderSummaryPage = () => {
     }
   }, [orderSummary, router]);
 
+  // useEffect สำหรับ localStorage โดยเฉพาะ (key แบบ user)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCustomerName = localStorage.getItem('user_username') || '';
+      const savedPhoneNumber = localStorage.getItem('user_phone') || '';
+      const savedAddress = localStorage.getItem('user_address') || '';
+      setDeliveryInfo({
+        customerName: savedCustomerName,
+        phoneNumber: savedPhoneNumber,
+        address: savedAddress,
+        deliveryDate: ''
+      });
+    }
+  }, []);
+
   const handleInputChange = (field: string, value: string) => {
     setDeliveryInfo(prev => ({
       ...prev,
@@ -31,9 +48,8 @@ const OrderSummaryPage = () => {
   };
 
   const handleConfirmOrder = async () => {
-    // ตรวจสอบข้อมูลที่จำเป็น
-    if (!deliveryInfo.storeName.trim()) {
-      alert('กรุณากรอกชื่อร้าน');
+    if (!deliveryInfo.customerName.trim()) {
+      alert('กรุณากรอกชื่อผู้สั่ง');
       return;
     }
     if (!deliveryInfo.phoneNumber.trim()) {
@@ -44,19 +60,36 @@ const OrderSummaryPage = () => {
       alert('กรุณากรอกที่อยู่');
       return;
     }
+    if (!deliveryInfo.deliveryDate) {
+      alert('กรุณาเลือกวันจัดส่ง');
+      return;
+    }
 
     setIsSubmitting(true);
     
-    // จำลองการส่งข้อมูล
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // ดึง user_doc_id จาก localStorage
+    let userDocId = '';
+    if (typeof window !== 'undefined') {
+      userDocId = localStorage.getItem('user_doc_id') || '';
+    }
 
-    const finalOrderSummary = `
+    try {
+      // เพิ่มข้อมูลลง Firestore
+      await addDoc(collection(db, 'orders'), {
+        user_doc_id: userDocId,
+        deliveryInfo: { ...deliveryInfo },
+        orderSummary: { ...orderSummary },
+        createdAt: Timestamp.now(),
+      });
+
+      const finalOrderSummary = `
 🎉 สั่งซื้อสำเร็จ!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 ข้อมูลการจัดส่ง:
-🏪 ชื่อร้าน: ${deliveryInfo.storeName}
+👤 ชื่อผู้สั่ง: ${deliveryInfo.customerName}
 📞 เบอร์โทร: ${deliveryInfo.phoneNumber}
 📍 ที่อยู่: ${deliveryInfo.address}
+🗓️ วันจัดส่ง: ${deliveryInfo.deliveryDate}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🛒 รายการสินค้า:
@@ -69,18 +102,21 @@ ${orderSummary?.items.map(item =>
 
 ขอบคุณที่ใช้บริการ! 🙏
 เราจะติดต่อกลับไปยังเบอร์ ${deliveryInfo.phoneNumber} เร็วๆ นี้
-    `;
+      `;
 
-    alert(finalOrderSummary);
-    setIsSubmitting(false);
-    router.push('/order');
+      alert(finalOrderSummary);
+      setIsSubmitting(false);
+      router.push('/order');
+    } catch (error) {
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+      setIsSubmitting(false);
+    }
   };
 
   if (!orderSummary) {
     return null;
   }
 
-  // Icons สำหรับฟอร์ม
   const StoreIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -120,60 +156,58 @@ ${orderSummary?.items.map(item =>
           </div>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="max-h-[70vh] overflow-y-auto">
+        {/* Content */}
+        <div className="p-6">
           {/* Order Summary */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-gray-800 mb-3">รายการสินค้าที่สั่งซื้อ:</h3>
-              {orderSummary.items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{item.emoji}</span>
-                    <div>
-                      <p className="font-medium text-gray-800">{item.name}</p>
-                      <p className="text-sm text-gray-600">{item.quantity} ชิ้น × {item.price}฿</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-green-600">{item.total.toLocaleString()}฿</p>
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-800 mb-3">รายการสินค้าที่สั่งซื้อ:</h3>
+            {orderSummary.items.map((item) => (
+              <div key={item.id} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{item.emoji}</span>
+                  <div>
+                    <p className="font-medium text-gray-800">{item.name}</p>
+                    <p className="text-sm text-gray-600">{item.quantity} ชิ้น × {item.price}฿</p>
                   </div>
                 </div>
-              ))}
-              <div className="border-t border-gray-200 pt-4 mt-6">
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-700">จำนวนทั้งหมด:</span>
-                    <span className="font-bold text-gray-900">{orderSummary.totalItems} ชิ้น</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-gray-700">ราคารวมทั้งสิ้น:</span>
-                    <span className="text-2xl font-bold text-green-600">{orderSummary.totalPrice.toLocaleString()}฿</span>
-                  </div>
+                <div className="text-right">
+                  <p className="font-bold text-green-600">{item.total.toLocaleString()}฿</p>
+                </div>
+              </div>
+            ))}
+            <div className="border-t border-gray-200 pt-4 mt-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-700">จำนวนทั้งหมด:</span>
+                  <span className="font-bold text-gray-900">{orderSummary.totalItems} ชิ้น</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold text-gray-700">ราคารวมทั้งสิ้น:</span>
+                  <span className="text-2xl font-bold text-green-600">{orderSummary.totalPrice.toLocaleString()}฿</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Delivery Information Form */}
-          <div className="p-6">
+          {/* Delivery Information */}
+          <div className="mt-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <LocationIcon className="w-6 h-6 text-blue-600" />
               ข้อมูลการจัดส่ง
             </h3>
             
             <div className="space-y-4">
-              {/* ชื่อร้าน */}
+              {/* ชื่อผู้สั่ง */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <StoreIcon className="w-4 h-4 inline mr-1" />
-                  ชื่อร้าน <span className="text-red-500">*</span>
+                  ชื่อผู้สั่ง <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={deliveryInfo.storeName}
-                  onChange={(e) => handleInputChange('storeName', e.target.value)}
-                  placeholder="กรอกชื่อร้านของคุณ"
+                  value={deliveryInfo.customerName}
+                  onChange={(e) => handleInputChange('customerName', e.target.value)}
+                  placeholder="กรอกชื่อผู้สั่งของคุณ"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 touch-manipulation"
                   maxLength={50}
                 />
@@ -212,6 +246,30 @@ ${orderSummary?.items.map(item =>
                 <div className="text-right mt-1">
                   <span className="text-xs text-gray-400">{deliveryInfo.address.length}/200</span>
                 </div>
+              </div>
+
+              {/* วันจัดส่ง */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <span className="inline-block mr-1">🗓️</span>
+                  วันที่ต้องการจัดส่ง <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={deliveryInfo.deliveryDate}
+                  onChange={e => handleInputChange('deliveryDate', e.target.value)}
+                  min={(() => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return tomorrow.toISOString().split('T')[0];
+                  })()}
+                  max={(() => {
+                    const maxDate = new Date();
+                    maxDate.setDate(maxDate.getDate() + 7);
+                    return maxDate.toISOString().split('T')[0];
+                  })()}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 touch-manipulation"
+                />
               </div>
             </div>
           </div>

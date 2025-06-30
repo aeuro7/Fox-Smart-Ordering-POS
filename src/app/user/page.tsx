@@ -1,23 +1,50 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Nav';
+import { db } from '../firebase/config';
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+
+const USER_STORAGE_KEYS = {
+  username: 'user_username',
+  email: 'user_email',
+  phone: 'user_phone',
+  address: 'user_address',
+};
 
 const UserProfilePage = () => {
   // สถานะสำหรับโหมดการแก้ไข
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   // ข้อมูลผู้ใช้
   const [userData, setUserData] = useState({
-    username: 'somchai_j',
-    email: 'somchai@example.com',
-    phone: '081-234-5678',
-    address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110'
+    username: '',
+    email: '',
+    phone: '',
+    address: ''
   });
 
   // สถานะชั่วคราวสำหรับการแก้ไข
-  const [formData, setFormData] = useState({...userData});
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
   
+  // โหลดข้อมูลจาก localStorage ตอน mount
+  useEffect(() => {
+    const storedData = {
+      username: localStorage.getItem(USER_STORAGE_KEYS.username) || '',
+      email: localStorage.getItem(USER_STORAGE_KEYS.email) || '',
+      phone: localStorage.getItem(USER_STORAGE_KEYS.phone) || '',
+      address: localStorage.getItem(USER_STORAGE_KEYS.address) || '',
+    };
+    setUserData(storedData);
+    setFormData(storedData);
+  }, []);
+
   // จัดการการเปลี่ยนแปลงข้อมูลในฟอร์ม
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -27,11 +54,36 @@ const UserProfilePage = () => {
     }));
   };
 
-  // บันทึกข้อมูลที่แก้ไข
-  const handleSubmit = (e: React.FormEvent) => {
+  // ดึง doc id จาก localStorage เพื่อใช้เป็น doc id
+  const getUserDocId = () => {
+    return localStorage.getItem('user_doc_id') || '';
+  };
+
+  // บันทึกข้อมูลที่แก้ไขและเซฟลง localStorage + Firestore
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUserData({...formData});
+    if (!formData) return;
+    setUserData({ ...formData });
     setIsEditing(false);
+    // เซฟลง localStorage
+    localStorage.setItem(USER_STORAGE_KEYS.username, formData.username);
+    // localStorage.setItem(USER_STORAGE_KEYS.email, formData.email); // ไม่ให้แก้ไข email
+    localStorage.setItem(USER_STORAGE_KEYS.phone, formData.phone);
+    localStorage.setItem(USER_STORAGE_KEYS.address, formData.address);
+    // อัปเดต Firestore โดยใช้ doc id
+    const userDocId = getUserDocId();
+    if (userDocId) {
+      try {
+        await updateDoc(doc(db, 'users', userDocId), {
+          username: formData.username,
+          phone: formData.phone,
+          address: formData.address,
+        });
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการอัปเดตข้อมูลในฐานข้อมูล');
+        console.error('Firestore update error:', err);
+      }
+    }
   };
 
   // ยกเลิกการแก้ไข
@@ -39,6 +91,17 @@ const UserProfilePage = () => {
     setFormData({...userData});
     setIsEditing(false);
   };
+
+  if (!userData || !formData) {
+    return (
+      <div>
+        <Navbar />
+        <div className="flex justify-center items-center min-h-screen">
+          <div>กำลังโหลดข้อมูล...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -181,6 +244,7 @@ const UserProfilePage = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-medium text-black bg-blue-50 placeholder-gray-500"
                   required
+                  disabled
                 />
               </div>
               

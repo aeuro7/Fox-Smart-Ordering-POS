@@ -1,6 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
+import { auth, db } from '../firebase/config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +18,7 @@ const RegisterPage = () => {
   });
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -80,42 +86,69 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
+    setErrors({});
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // สมัครสมาชิกกับ Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const user = userCredential.user;
 
-    const registrationSummary = `
-🎉 สมัครสมาชิกสำเร็จ!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👤 ชื่อผู้ใช้: ${formData.username}
-📧 อีเมล: ${formData.email}
-📱 เบอร์โทร: ${formData.phone}
-🏠 ที่อยู่: ${formData.address}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // บันทึกข้อมูลเพิ่มเติมลง Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        createdAt: new Date()
+      });
 
-ยินดีต้อนรับสู่ Foxy9! 🦊
-คุณสามารถเข้าสู่ระบบได้แล้ว
-    `;
-
-    alert(registrationSummary);
-    
-    // Reset form
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      phone: '',
-      address: ''
-    });
-    
-    setIsSubmitting(false);
+      // redirect ไปหน้า login หลังปิด popup
+      await Swal.fire({
+        icon: 'success',
+        title: 'สมัครสมาชิกสำเร็จ!',
+        html: `
+          <div style="text-align:left;">
+            <b>👤 ชื่อผู้ใช้:</b> ${formData.username}<br/>
+            <b>📧 อีเมล:</b> ${formData.email}<br/>
+            <b>📱 เบอร์โทร:</b> ${formData.phone}<br/>
+            <b>🏠 ที่อยู่:</b> ${formData.address}
+          </div>
+          <hr/>
+          <div style="margin-top:8px;">ยินดีต้อนรับสู่ Foxy9! 🦊<br/>คุณสามารถเข้าสู่ระบบได้แล้ว</div>
+        `,
+        confirmButtonText: 'ไปหน้าเข้าสู่ระบบ',
+        customClass: {
+          popup: 'rounded-2xl'
+        }
+      });
+      router.push('/login');
+    } catch (error: any) {
+      // แสดง error จาก Firebase
+      console.error('Registration error:', error);
+      let firebaseError = {} as {[key: string]: string};
+      if (error.code === 'auth/email-already-in-use') {
+        firebaseError.email = 'อีเมลนี้ถูกใช้ไปแล้ว';
+      } else if (error.code === 'auth/invalid-email') {
+        firebaseError.email = 'อีเมลไม่ถูกต้อง';
+      } else if (error.code === 'auth/weak-password') {
+        firebaseError.password = 'รหัสผ่านอ่อนเกินไป';
+      } else {
+        firebaseError.general = error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+      }
+      setErrors(firebaseError);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -328,6 +361,11 @@ const RegisterPage = () => {
             รับสิทธิพิเศษและโปรโมชั่นดีๆ มากมาย
           </p>
         </div>
+
+        {/* แสดง error อื่น ๆ (ถ้ามี) */}
+        {errors.general && (
+          <p className="text-red-500 text-center text-sm font-medium">{errors.general}</p>
+        )}
       </div>
     </div>
   );

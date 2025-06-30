@@ -1,26 +1,30 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB8ZfA4MdXdeF0hZbECrJ0EehQ7Bz-eD8s",
-  authDomain: "receipt-dang.firebaseapp.com",
-  projectId: "receipt-dang",
-  storageBucket: "receipt-dang.firebasestorage.app",
-  messagingSenderId: "111937372224",
-  appId: "1:111937372224:web:f9bfd602273f51bf355fa5",
-  measurementId: "G-7X6ZE0VZNN"
+  apiKey: "AIzaSyBiUI9pxXElGXfrHKDyPYDUJ6yeTmmpPMU",
+  authDomain: "foxy-4b56b.firebaseapp.com",
+  projectId: "foxy-4b56b",
+  storageBucket: "foxy-4b56b.appspot.com",
+  messagingSenderId: "448207274113",
+  appId: "1:448207274113:web:2ee4824e4bf8abc56e4d80",
+  measurementId: "G-LFN03Q99J0"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase (ป้องกันการ initialize ซ้ำใน Next.js)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Analytics only in browser environment
-let analytics = null;
-if (typeof window !== 'undefined') {
-  isSupported().then(yes => yes && (analytics = getAnalytics(app)));
+// Analytics (รองรับเฉพาะ client-side)
+let analytics: ReturnType<typeof getAnalytics> | undefined = undefined;
+if (typeof window !== "undefined") {
+  isSupported().then((yes) => {
+    if (yes) analytics = getAnalytics(app);
+  });
 }
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-export { db, analytics }; 
+export { app, db, analytics, auth }; 

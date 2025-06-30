@@ -37,3 +37,16 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.swal2-theme-confirm {
+  @apply bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-full shadow-md px-6 py-2 text-base transition-all duration-200;
+}
+.swal2-theme-confirm:hover {
+  @apply from-blue-600 to-indigo-700 shadow-lg;
+}
+.swal2-theme-cancel {
+  @apply bg-gray-200 text-gray-800 font-medium rounded-full shadow-md px-6 py-2 text-base transition-all duration-200 ml-2;
+}
+.swal2-theme-cancel:hover {
+  @apply bg-gray-300 shadow-lg;
+}

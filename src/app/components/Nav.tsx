@@ -10,14 +10,50 @@ import {
   AiOutlineLogout 
 } from 'react-icons/ai';
 import { RiTBoxLine } from 'react-icons/ri';
+import { auth } from '../firebase/config';
+import { signOut } from 'firebase/auth';
+import Swal from 'sweetalert2';
 
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
-      alert('ออกจากระบบสำเร็จ');
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'ออกจากระบบ',
+      text: 'คุณต้องการออกจากระบบหรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่, ออกจากระบบ',
+      cancelButtonText: 'ยกเลิก',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'swal2-theme-confirm',
+        cancelButton: 'swal2-theme-cancel',
+        title: 'text-blue-700',
+        icon: 'text-blue-500'
+      },
+      buttonsStyling: false
+    });
+    if (result.isConfirmed) {
+      try {
+        await signOut(auth);
+      } catch (e) {}
+      localStorage.clear();
+      sessionStorage.clear();
+      await Swal.fire({
+        title: 'ออกจากระบบสำเร็จ',
+        text: 'คุณได้ออกจากระบบเรียบร้อย',
+        icon: 'success',
+        confirmButtonText: 'ไปหน้าเข้าสู่ระบบ',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'swal2-theme-confirm',
+          title: 'text-indigo-700',
+          icon: 'text-indigo-500'
+        },
+        buttonsStyling: false
+      });
       router.push('/login');
     }
   };

@@ -1,21 +1,58 @@
 "use client";
 
 import React, { useState } from 'react';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { app } from '../firebase/config';
+import { useRouter } from 'next/navigation';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError('กรุณากรอกอีเมลและรหัสผ่าน');
       return;
     }
     setError('');
-    // TODO: เพิ่ม logic การเข้าสู่ระบบจริง
-    alert('เข้าสู่ระบบสำเร็จ!');
+    setIsSubmitting(true);
+    try {
+      const auth = getAuth(app);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const idToken = await user.getIdToken();
+      const db = getFirestore(app);
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        localStorage.setItem('user_token', idToken);
+        localStorage.setItem('user_email', userData.email || '');
+        localStorage.setItem('user_username', userData.username || '');
+        localStorage.setItem('user_phone', userData.phone || '');
+        localStorage.setItem('user_address', userData.address || '');
+        localStorage.setItem('user_doc_id', user.uid);
+      } else {
+        localStorage.setItem('user_token', idToken);
+        localStorage.setItem('user_email', user.email || '');
+        localStorage.setItem('user_doc_id', user.uid);
+      }
+      router.push('/home');
+    } catch (err: any) {
+      let msg = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        msg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+      } else if (err.code === 'auth/invalid-email') {
+        msg = 'รูปแบบอีเมลไม่ถูกต้อง';
+      }
+      setError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -76,9 +113,16 @@ const LoginPage = () => {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-4 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
+                disabled={isSubmitting}
               >
-                🚀 เข้าสู่ระบบ
+                {isSubmitting && (
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                )}
+                {isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
               </button>
             </div>
 
