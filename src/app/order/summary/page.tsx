@@ -18,12 +18,22 @@ const OrderSummaryPage = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [popupType, setPopupType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     if (!orderSummary) {
       router.replace('/order');
     }
   }, [orderSummary, router]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+      router.replace('/login');
+    }
+  }, [router]);
 
   // useEffect สำหรับ localStorage โดยเฉพาะ (key แบบ user)
   useEffect(() => {
@@ -49,19 +59,27 @@ const OrderSummaryPage = () => {
 
   const handleConfirmOrder = async () => {
     if (!deliveryInfo.customerName.trim()) {
-      alert('กรุณากรอกชื่อผู้สั่ง');
+      setPopupType('error');
+      setPopupMessage('กรุณากรอกชื่อผู้สั่ง');
+      setShowPopup(true);
       return;
     }
     if (!deliveryInfo.phoneNumber.trim()) {
-      alert('กรุณากรอกเบอร์โทรศัพท์');
+      setPopupType('error');
+      setPopupMessage('กรุณากรอกเบอร์โทรศัพท์');
+      setShowPopup(true);
       return;
     }
     if (!deliveryInfo.address.trim()) {
-      alert('กรุณากรอกที่อยู่');
+      setPopupType('error');
+      setPopupMessage('กรุณากรอกที่อยู่');
+      setShowPopup(true);
       return;
     }
     if (!deliveryInfo.deliveryDate) {
-      alert('กรุณาเลือกวันจัดส่ง');
+      setPopupType('error');
+      setPopupMessage('กรุณาเลือกวันจัดส่ง');
+      setShowPopup(true);
       return;
     }
 
@@ -74,41 +92,33 @@ const OrderSummaryPage = () => {
     }
 
     try {
+      // สร้าง my_order_id จากวันเวลาปัจจุบัน (yyyyMMddHHmmss)
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const myOrderId = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
       // เพิ่มข้อมูลลง Firestore
       await addDoc(collection(db, 'orders'), {
         user_doc_id: userDocId,
+        my_order_id: myOrderId,
         deliveryInfo: { ...deliveryInfo },
         orderSummary: { ...orderSummary },
         createdAt: Timestamp.now(),
       });
 
-      const finalOrderSummary = `
-🎉 สั่งซื้อสำเร็จ!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 ข้อมูลการจัดส่ง:
-👤 ชื่อผู้สั่ง: ${deliveryInfo.customerName}
-📞 เบอร์โทร: ${deliveryInfo.phoneNumber}
-📍 ที่อยู่: ${deliveryInfo.address}
-🗓️ วันจัดส่ง: ${deliveryInfo.deliveryDate}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🛒 รายการสินค้า:
-${orderSummary?.items.map(item =>
-      `${item.emoji} ${item.name}: ${item.quantity} ชิ้น × ${item.price}฿ = ${item.total}฿`
-    ).join('\n')}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 จำนวนทั้งหมด: ${orderSummary?.totalItems} ชิ้น
-💰 ราคารวม: ${orderSummary?.totalPrice.toLocaleString()}฿
-
-ขอบคุณที่ใช้บริการ! 🙏
-เราจะติดต่อกลับไปยังเบอร์ ${deliveryInfo.phoneNumber} เร็วๆ นี้
-      `;
-
-      alert(finalOrderSummary);
+      const finalOrderSummary = `สั่งซื้อสำเร็จ\nกรุณารอการติดต่อกลับ`;
+      setPopupType('success');
+      setPopupMessage(finalOrderSummary);
+      setShowPopup(true);
       setIsSubmitting(false);
-      router.push('/order');
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push('/order');
+      }, 2000);
     } catch (error) {
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+      setPopupType('error');
+      setPopupMessage('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+      setShowPopup(true);
       setIsSubmitting(false);
     }
   };
@@ -164,7 +174,6 @@ ${orderSummary?.items.map(item =>
             {orderSummary.items.map((item) => (
               <div key={item.id} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{item.emoji}</span>
                   <div>
                     <p className="font-medium text-gray-800">{item.name}</p>
                     <p className="text-sm text-gray-600">{item.quantity} ชิ้น × {item.price}฿</p>
@@ -308,6 +317,31 @@ ${orderSummary?.items.map(item =>
           </div>
         </div>
       </div>
+
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className={`bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-t-8 ${popupType === 'success' ? 'border-green-500' : 'border-red-500'}`}>
+            <div className="flex flex-col items-center text-center">
+              {popupType === 'success' ? (
+                <div className="text-5xl mb-2">🎉</div>
+              ) : (
+                <div className="text-5xl mb-2">❌</div>
+              )}
+              <div className="whitespace-pre-line text-gray-800 text-base mb-4" style={{wordBreak: 'break-word'}}>{popupMessage}</div>
+              <button
+                className={`mt-2 px-6 py-2 rounded-full font-semibold shadow transition-all duration-200 ${popupType === 'success' ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`}
+                onClick={() => {
+                  setShowPopup(false);
+                  if (popupType === 'success') router.push('/order');
+                }}
+              >
+                {popupType === 'success' ? 'ปิดหน้าต่าง' : 'ตกลง'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

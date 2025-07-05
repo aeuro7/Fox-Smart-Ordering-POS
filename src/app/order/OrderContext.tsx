@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export interface OrderItem {
   id: number;
   name: string;
-  emoji: string;
   quantity: number;
   price: number;
   total: number;

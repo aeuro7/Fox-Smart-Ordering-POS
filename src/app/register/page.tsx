@@ -151,23 +151,10 @@ const RegisterPage = () => {
     }
   };
 
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
-    
-    // Format as XXX-XXX-XXXX
-    if (digits.length <= 3) {
-      return digits;
-    } else if (digits.length <= 6) {
-      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    } else {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-    }
-  };
-
   const handlePhoneChange = (value: string) => {
-    const formatted = formatPhoneNumber(value);
-    handleInputChange('phone', formatted);
+    // รับเฉพาะตัวเลข
+    const digits = value.replace(/\D/g, '');
+    handleInputChange('phone', digits);
   };
 
   return (
@@ -289,7 +276,7 @@ const RegisterPage = () => {
                 value={formData.phone}
                 onChange={e => handlePhoneChange(e.target.value)}
                 placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
-                maxLength={12}
+                maxLength={10}
               />
               {errors.phone && (
                 <p className="text-red-500 text-sm font-medium">{errors.phone}</p>
@@ -341,26 +328,18 @@ const RegisterPage = () => {
 
           </form>
 
-          {/* Footer Links */}
-          <div className="mt-8 text-center">
-            <div className="text-gray-500 text-sm">
-              มีบัญชีอยู่แล้ว? 
-              <button className="text-blue-500 hover:text-blue-600 font-semibold ml-1 transition-colors duration-200">
-                เข้าสู่ระบบ
-              </button>
-            </div>
-          </div>
+          
 
         </div>
 
-        {/* Additional Info Card */}
+        {/* Additional Info Card
         <div className="mt-6 bg-white/70 backdrop-blur-sm rounded-2xl p-6 text-center">
           <div className="text-2xl mb-2">✨</div>
           <p className="text-gray-600 text-sm">
             สมัครสมาชิกวันนี้<br/>
             รับสิทธิพิเศษและโปรโมชั่นดีๆ มากมาย
           </p>
-        </div>
+        </div> */}
 
         {/* แสดง error อื่น ๆ (ถ้ามี) */}
         {errors.general && (

@@ -9,7 +9,7 @@
     @apply bg-gray-900;
   }
   button {
-    @apply text-white;
+    @apply text-black;
   }
 }
 

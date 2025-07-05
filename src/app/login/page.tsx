@@ -35,15 +35,24 @@ const LoginPage = () => {
         localStorage.setItem('user_username', userData.username || '');
         localStorage.setItem('user_phone', userData.phone || '');
         localStorage.setItem('user_address', userData.address || '');
+        localStorage.setItem('user_role', userData.role || '');
         localStorage.setItem('user_doc_id', user.uid);
+
+        // ตรวจสอบว่าเป็น admin หรือไม่
+        if (userData.role == "admin") {
+          router.push('/Admin');
+        } else {
+          router.push('/home');
+        }
       } else {
         localStorage.setItem('user_token', idToken);
         localStorage.setItem('user_email', user.email || '');
         localStorage.setItem('user_doc_id', user.uid);
+        // ถ้าไม่มีข้อมูลใน Firestore ให้ไปหน้า home
+        router.push('/login');
       }
-      router.push('/home');
     } catch (err: any) {
-      let msg = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+      let msg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         msg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
       } else if (err.code === 'auth/invalid-email') {
@@ -128,20 +137,7 @@ const LoginPage = () => {
 
           </form>
 
-          {/* Footer Links */}
-          <div className="mt-8 text-center space-y-3">
-            <div className="text-gray-500 text-sm">
-              ยังไม่มีบัญชี? 
-              <button className="text-blue-500 hover:text-blue-600 font-semibold ml-1 transition-colors duration-200">
-                สมัครสมาชิก
-              </button>
-            </div>
-            <div>
-              <button className="text-blue-500 hover:text-blue-600 text-sm font-medium transition-colors duration-200">
-                ลืมรหัสผ่าน?
-              </button>
-            </div>
-          </div>
+         
 
         </div>
 

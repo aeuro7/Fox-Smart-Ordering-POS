@@ -18,16 +18,12 @@ const ProductOrderPage = () => {
   const router = useRouter();
 
   const products = [
-    { id: 1, name: 'แอปเปิ้ล', emoji: '🍎', category: 'ผลไม้', price: 45 },
-    { id: 2, name: 'ส้ม', emoji: '🍊', category: 'ผลไม้', price: 35 },
-    { id: 3, name: 'กีวี่', emoji: '🥝', category: 'ผลไม้', price: 80 },
-    { id: 4, name: 'มะเขือเทศ', emoji: '🍅', category: 'ผัก', price: 25 },
-    { id: 5, name: 'แครอท', emoji: '🥕', category: 'ผัก', price: 30 },
-    { id: 6, name: 'บรอกโคลี่', emoji: '🥦', category: 'ผัก', price: 40 },
-    { id: 7, name: 'กล้วย', emoji: '🍌', category: 'ผลไม้', price: 20 },
-    { id: 8, name: 'องุ่น', emoji: '🍇', category: 'ผลไม้', price: 120 },
-    { id: 9, name: 'มะม่วง', emoji: '🥭', category: 'ผลไม้', price: 65 },
-    { id: 10, name: 'อะโวคาโด', emoji: '🥑', category: 'ผลไม้', price: 85 }
+    { id: 1, name: 'บุหรี่พวง', category: 'อื่นๆ', price: 150 },
+    { id: 2, name: 'บุหรี่ถุง(10กิโล)', category: 'อื่นๆ', price: 300 },
+    { id: 3, name: 'พวงหนังยาง', category: 'อื่นๆ', price: 50 },
+    { id: 4, name: 'ปลาร้าบดถ้วย(1กิโล)', category: 'อื่นๆ', price: 50 },
+    { id: 5, name: 'ปลาร้าตัวถ้วย(1กิโล)', category: 'อื่นๆ', price: 50 },
+    { id: 6, name: 'ปลาร้าปิ้บ(22กิโล)', category: 'อื่นๆ', price: 600 }
   ];
 
   // Calculate totals
@@ -43,7 +39,6 @@ const ProductOrderPage = () => {
     .map((product) => ({
       id: product.id,
       name: product.name,
-      emoji: product.emoji,
       quantity: quantities[product.id],
       price: product.price,
       total: quantities[product.id] * product.price
@@ -132,6 +127,13 @@ const ProductOrderPage = () => {
     return Array.from({ length: 101 }, (_, i) => i);
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+      router.replace('/login');
+    }
+  }, [router]);
+
   return (
     
 
@@ -189,14 +191,13 @@ const ProductOrderPage = () => {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="text-3xl md:text-4xl">{product.emoji}</div>
                     <div>
-                      <h3 className="text-base md:text-lg font-semibold text-gray-800">
+                      <h3 className="text-2xl md:text-2xl font-semibold text-gray-800">
                         {product.name}
                       </h3>
-                      <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                      {/* <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
                         {product.category}
-                      </span>
+                      </span> */}
                     </div>
                   </div>
                   <div className="text-right">
@@ -350,7 +351,6 @@ const ProductOrderPage = () => {
                   {orderItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-xl">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{item.emoji}</span>
                         <div>
                           <p className="font-medium text-gray-800">{item.name}</p>
                           <p className="text-sm text-gray-600">{item.quantity} ชิ้น × {item.price}฿</p>
@@ -434,7 +434,6 @@ const ProductOrderPage = () => {
                 {orderItems.map((item) => (
                   <div key={item.id} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{item.emoji}</span>
                       <div>
                         <p className="font-medium text-gray-800">{item.name}</p>
                         <p className="text-sm text-gray-600">{item.quantity} ชิ้น × {item.price}฿</p>

@@ -45,6 +45,13 @@ const UserProfilePage = () => {
     setFormData(storedData);
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+      window.location.replace('/login');
+    }
+  }, []);
+
   // จัดการการเปลี่ยนแปลงข้อมูลในฟอร์ม
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

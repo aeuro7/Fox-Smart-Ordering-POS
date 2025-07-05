@@ -10,8 +10,8 @@ const sarabun = Sarabun({
 });
 
 export const metadata: Metadata = {
-  title: "ระบบพิมพ์ใบเสร็จ/ใบเสนอราคา",
-  description: "ระบบพิมพ์ใบเสร็จและใบเสนอราคาเป็น PDF",
+  title: "Foxy Order",
+  description: "",
 };
 
 export default function RootLayout({
