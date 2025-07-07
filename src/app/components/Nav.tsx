@@ -7,7 +7,8 @@ import {
   AiOutlineHome, 
   AiOutlineShoppingCart, 
   AiOutlineUser, 
-  AiOutlineLogout 
+  AiOutlineLogout, 
+  AiOutlineProfile 
 } from 'react-icons/ai';
 import { RiTBoxLine } from 'react-icons/ri';
 import { auth } from '../firebase/config';
@@ -61,6 +62,7 @@ const Navbar = () => {
   const navItems = [
     { path: '/home', label: 'หน้าแรก', icon: AiOutlineHome },
     { path: '/order', label: 'ออเดอร์', icon: AiOutlineShoppingCart },
+    { path: '/myhistory', label: 'ประวัติ', icon: AiOutlineProfile },
     { path: '/user', label: 'บัญชี', icon: AiOutlineUser },
   ];
 

@@ -18,12 +18,12 @@ const ProductOrderPage = () => {
   const router = useRouter();
 
   const products = [
-    { id: 1, name: 'บุหรี่พวง', category: 'อื่นๆ', price: 150 },
-    { id: 2, name: 'บุหรี่ถุง(10กิโล)', category: 'อื่นๆ', price: 300 },
-    { id: 3, name: 'พวงหนังยาง', category: 'อื่นๆ', price: 50 },
-    { id: 4, name: 'ปลาร้าบดถ้วย(1กิโล)', category: 'อื่นๆ', price: 50 },
-    { id: 5, name: 'ปลาร้าตัวถ้วย(1กิโล)', category: 'อื่นๆ', price: 50 },
-    { id: 6, name: 'ปลาร้าปิ้บ(22กิโล)', category: 'อื่นๆ', price: 600 }
+    { id: 1, name: 'บุหรี่พวง', category: 'อื่นๆ', price: 150, image: '/pic/1.jpg' },
+    { id: 2, name: 'บุหรี่ถุง(10กิโล)', category: 'อื่นๆ', price: 300, image: '/pic/1.jpg' },
+    { id: 3, name: 'พวงหนังยาง', category: 'อื่นๆ', price: 50, image: '/pic/1.jpg' },
+    { id: 4, name: 'ปลาร้าบดถ้วย(1กิโล)', category: 'อื่นๆ', price: 50, image: '/pic/1.jpg' },
+    { id: 5, name: 'ปลาร้าตัวถ้วย(1กิโล)', category: 'อื่นๆ', price: 50, image: '/pic/1.jpg' },
+    { id: 6, name: 'ปลาร้าปิ้บ(22กิโล)', category: 'อื่นๆ', price: 600, image: '/pic/1.jpg' }
   ];
 
   // Calculate totals
@@ -189,7 +189,12 @@ const ProductOrderPage = () => {
                 key={product.id}
                 className="bg-white rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
               >
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col items-center justify-center mb-4">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-32 h-32 object-contain mb-2 rounded-xl shadow-sm border border-gray-100 bg-gray-50"
+                  />
                   <div className="flex items-center space-x-3">
                     <div>
                       <h3 className="text-2xl md:text-2xl font-semibold text-gray-800">
@@ -201,8 +206,11 @@ const ProductOrderPage = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg md:text-2xl font-bold text-green-600">{product.price}฿</p>
-                    <p className="text-xs text-gray-500">ต่อชิ้น</p>
+                    <p className="text-lg md:text-2xl font-bold text-green-600">
+                    {/* <span className="text-xs text-gray-400 ml-1">ราคา </span> */}
+                      {product.price}฿
+                       {/* <span className="text-xs text-gray-400 ml-1">ต่อชิ้น</span> */}
+                    </p>                    
                   </div>
                 </div>
 
@@ -211,10 +219,10 @@ const ProductOrderPage = () => {
                     <button
                       type="button"
                       onClick={() => decrementQuantity(product.id)}
-                      className="w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all duration-150"
+                      className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all duration-150"
                       disabled={!quantities[product.id] || quantities[product.id] === 0}
                     >
-                      <MinusIcon className="w-6 h-6" />
+                      <MinusIcon className="w-5 h-5" />
                     </button>
 
                     <div className="flex-1 max-w-[120px]">
@@ -232,10 +240,10 @@ const ProductOrderPage = () => {
                     <button
                       type="button"
                       onClick={() => incrementQuantity(product.id)}
-                      className="w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all duration-150"
+                      className="w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all duration-150"
                       disabled={quantities[product.id] >= 100}
                     >
-                      <PlusIcon className="w-6 h-6" />
+                      <PlusIcon className="w-5 h-5" />
                     </button>
                   </div>
 
@@ -249,7 +257,7 @@ const ProductOrderPage = () => {
                       <button
                         type="button"
                         onClick={() => setOpenDropdown(openDropdown === product.id ? null : product.id)}
-                        className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 text-sm"
+                        className="px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 text-xs"
                       >
                         <span>เลือกจำนวน</span>
                         <ChevronDown

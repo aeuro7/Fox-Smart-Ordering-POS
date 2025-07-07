@@ -61,6 +61,15 @@ const HomePage = () => {
                 <span>สั่งออเดอร์</span>
               </button>
 
+              {/* History Button */}
+              <button
+                onClick={() => router.push('/myhistory')}
+                className="w-full py-6 px-6 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3"
+              >
+                <span className="text-2xl">📄</span>
+                <span>ประวัติการสั่งซื้อ</span>
+              </button>
+
               {/* Settings Button */}
               <button
                 onClick={handleSettingsClick}
