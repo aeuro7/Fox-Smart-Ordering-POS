@@ -18,12 +18,12 @@ const ProductOrderPage = () => {
   const router = useRouter();
 
   const products = [
-    { id: 1, name: 'บุหรี่พวง', category: 'อื่นๆ', price: 150, image: '/pic/1.jpg' },
-    { id: 2, name: 'บุหรี่ถุง(10กิโล)', category: 'อื่นๆ', price: 300, image: '/pic/1.jpg' },
-    { id: 3, name: 'พวงหนังยาง', category: 'อื่นๆ', price: 50, image: '/pic/1.jpg' },
-    { id: 4, name: 'ปลาร้าบดถ้วย(1กิโล)', category: 'อื่นๆ', price: 50, image: '/pic/1.jpg' },
-    { id: 5, name: 'ปลาร้าตัวถ้วย(1กิโล)', category: 'อื่นๆ', price: 50, image: '/pic/1.jpg' },
-    { id: 6, name: 'ปลาร้าปิ้บ(22กิโล)', category: 'อื่นๆ', price: 600, image: '/pic/1.jpg' }
+    { id: 1, name: 'บุหรี่พวง', category: 'อื่นๆ', price: 150, image: '/pic/hammer.png' },
+    { id: 2, name: 'บุหรี่ถุง(10กิโล)', category: 'อื่นๆ', price: 300, image: '/pic/hammer.png' },
+    { id: 3, name: 'พวงหนังยาง', category: 'อื่นๆ', price: 50, image: '/pic/hammer.png' },
+    { id: 4, name: 'ปลาร้าบดถ้วย(1กิโล)', category: 'อื่นๆ', price: 50, image: '/pic/hammer.png' },
+    { id: 5, name: 'ปลาร้าตัวถ้วย(1กิโล)', category: 'อื่นๆ', price: 50, image: '/pic/hammer.png' },
+    { id: 6, name: 'ปลาร้าปิ้บ(22กิโล)', category: 'อื่นๆ', price: 600, image: '/pic/hammer.png' }
   ];
 
   // Calculate totals
