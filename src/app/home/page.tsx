@@ -1,17 +1,22 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Nav';
 
 const HomePage = () => {
   const router = useRouter();
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('user_token');
     if (!token) {
       router.replace('/login');
     }
+    // ดึงชื่อผู้ใช้จาก localStorage เฉพาะชื่อหน้า
+    const name = localStorage.getItem('user_username') || '';
+    const firstName = name.split(' ')[0] || '';
+    setUsername(firstName);
   }, [router]);
 
   const handleOrderClick = () => {
@@ -44,7 +49,7 @@ const HomePage = () => {
             <div className="text-center mb-8">
               <div className="text-6xl mb-4">🦊</div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-                สวัสดี Foxy9
+                {`สวัสดี${username ? ' ' + username : ' ลูกค้า'}`}
               </h1>
               <p className="text-gray-600">เลือกบริการที่คุณต้องการใช้งาน</p>
             </div>

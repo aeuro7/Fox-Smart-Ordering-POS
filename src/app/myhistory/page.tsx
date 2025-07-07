@@ -119,13 +119,13 @@ const MyHistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 overflow-x-hidden w-full">
       <Navbar />
-      <div className="max-w-2xl mx-auto p-4 sm:p-6">
+      <div className="w-full max-w-2xl mx-auto p-2 sm:p-6">
         <h1 className="text-2xl font-bold mb-6 mt-5 text-center text-gray-900 ">📄 ประวัติการสั่งซื้อของฉัน</h1>
-        <div className="mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+        <div className="mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 w-full max-w-full">
           <label htmlFor="filter-date" className="block text-sm font-medium text-gray-700 mb-1 sm:mb-0">กรองตามวันที่สั่งซื้อ:</label>
-          <div className="relative w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto max-w-full">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" fill="none"/>
@@ -144,7 +144,7 @@ const MyHistoryPage = () => {
           </div>
           <button
             onClick={handleShowAll}
-            className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 hover:shadow-lg transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+            className="px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow hover:shadow-lg transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 w-full sm:w-auto"
           >
             แสดงทั้งหมด
           </button>
