@@ -10,6 +10,7 @@ interface Order {
     customerName: string;
     deliveryDate: string;
     phoneNumber: string;
+    deliveryTime?: string;
   };
   orderSummary: {
     items: Array<{
@@ -67,6 +68,11 @@ const PDFDownloader: React.FC<PDFDownloaderProps> = ({ orders, selectedDate }) =
             .date {
               font-size: 16px;
               color: #6b7280;
+            }
+            .time {
+              font-size: 15px;
+              color: #2563eb;
+              margin-top: 2px;
             }
             .order {
               border: 1px solid #e5e7eb;
@@ -157,6 +163,7 @@ const PDFDownloader: React.FC<PDFDownloaderProps> = ({ orders, selectedDate }) =
           <div class="header">
             <div class="title">รายการส่งของประจำวัน</div>
             <div class="date">วันที่: ${thaiDate}</div>
+            ${order.deliveryInfo.deliveryTime ? `<div class="time">เวลา: ${order.deliveryInfo.deliveryTime}</div>` : ''}
           </div>
           
           <div class="order">
@@ -177,6 +184,10 @@ const PDFDownloader: React.FC<PDFDownloaderProps> = ({ orders, selectedDate }) =
               <div class="info-row">
                 <span class="info-label">ที่อยู่:</span>
                 <span>${order.deliveryInfo.address}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">เวลาจัดส่ง:</span>
+                <span>${order.deliveryInfo.deliveryTime ? order.deliveryInfo.deliveryTime : '-'}</span>
               </div>
             </div>
             

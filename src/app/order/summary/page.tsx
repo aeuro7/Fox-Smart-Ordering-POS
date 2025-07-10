@@ -14,7 +14,8 @@ const OrderSummaryPage = () => {
     customerName: '',
     phoneNumber: '',
     address: '',
-    deliveryDate: ''
+    deliveryDate: '',
+    deliveryTime: '' // เพิ่มช่องเวลา
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +46,8 @@ const OrderSummaryPage = () => {
         customerName: savedCustomerName,
         phoneNumber: savedPhoneNumber,
         address: savedAddress,
-        deliveryDate: ''
+        deliveryDate: '',
+        deliveryTime: ''
       });
     }
   }, []);
@@ -82,6 +84,12 @@ const OrderSummaryPage = () => {
       setShowPopup(true);
       return;
     }
+    if (!deliveryInfo.deliveryTime) {
+      setPopupType('error');
+      setPopupMessage('กรุณาเลือกเวลาจัดส่ง');
+      setShowPopup(true);
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -92,16 +100,23 @@ const OrderSummaryPage = () => {
     }
 
     try {
-      // สร้าง my_order_id จากวันเวลาปัจจุบัน (yyyyMMddHHmmss)
+      // สร้าง my_order_id จากวันเวลาปัจจุบัน (yyMMddHHmmss)
       const now = new Date();
       const pad = (n: number) => n.toString().padStart(2, '0');
-      const myOrderId = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-
+      const yearShort = now.getFullYear().toString().slice(-2);
+      const myOrderId = `${yearShort}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      
       // เพิ่มข้อมูลลง Firestore
       await addDoc(collection(db, 'orders'), {
         user_doc_id: userDocId,
         my_order_id: myOrderId,
-        deliveryInfo: { ...deliveryInfo },
+        deliveryInfo: {
+          customerName: deliveryInfo.customerName,
+          phoneNumber: deliveryInfo.phoneNumber,
+          address: deliveryInfo.address,
+          deliveryDate: deliveryInfo.deliveryDate,
+          deliveryTime: deliveryInfo.deliveryTime,
+        },
         orderSummary: { ...orderSummary },
         createdAt: Timestamp.now(),
       });
@@ -279,6 +294,22 @@ const OrderSummaryPage = () => {
                   })()}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 touch-manipulation"
                 />
+              </div>
+              {/* เวลา */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <span className="inline-block mr-1">⏰</span>
+                  เวลาที่ต้องการจัดส่ง <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={deliveryInfo.deliveryTime}
+                  onChange={e => handleInputChange('deliveryTime', e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 touch-manipulation"
+                >
+                  <option value="">เลือกเวลา</option>
+                  <option value="10:00">10:00</option>
+                  <option value="12:00">12:00</option>
+                </select>
               </div>
             </div>
           </div>

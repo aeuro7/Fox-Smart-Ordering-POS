@@ -17,6 +17,7 @@ interface Order {
     customerName: string;
     deliveryDate: string;
     phoneNumber: string;
+    deliveryTime?: string; // Added deliveryTime
   };
   orderSummary: {
     items: Array<{
@@ -283,6 +284,21 @@ const DeliverySchedulePage = () => {
                       <Phone className="text-gray-400" size={16} />
                       <span className="text-gray-600">{order.deliveryInfo.phoneNumber}</span>
                     </div>
+                    {order.deliveryInfo.deliveryDate && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="text-gray-400" size={16} />
+                        <span className="text-gray-600">
+                          {new Date(order.deliveryInfo.deliveryDate).toLocaleDateString('th-TH', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                          {order.deliveryInfo.deliveryTime && (
+                            <span className="ml-2 text-blue-600">เวลา {order.deliveryInfo.deliveryTime}</span>
+                          )}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Order Items */}

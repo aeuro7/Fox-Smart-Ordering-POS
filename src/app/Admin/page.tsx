@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { Search, Filter, Calendar, Package, DollarSign, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Filter, Calendar, Package, DollarSign, TrendingUp, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import AdminNav from '../components/AdminNav';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
@@ -23,6 +23,7 @@ interface Order {
     customerName: string;
     deliveryDate: string;
     phoneNumber: string;
+    deliveryTime?: string; // Added deliveryTime
   };
   orderSummary: {
     items: OrderItem[];
@@ -292,9 +293,9 @@ const AdminPage = () => {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">ที่อยู่</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">เบอร์โทร</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">วันส่ง</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">จำนวนสินค้า</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600">ราคารวม</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">รายการสินค้า</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">แก้ไข</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -306,7 +307,7 @@ const AdminPage = () => {
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString('th-TH') : ''}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                       {order.deliveryInfo?.customerName}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
@@ -316,14 +317,18 @@ const AdminPage = () => {
                       {order.deliveryInfo?.phoneNumber}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                      {order.deliveryInfo?.deliveryDate ? new Date(order.deliveryInfo.deliveryDate).toLocaleDateString('th-TH', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      }) : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center text-gray-600">
-                      {order.orderSummary?.totalItems}
+                      {order.deliveryInfo?.deliveryDate ? (
+                        <>
+                          {new Date(order.deliveryInfo.deliveryDate).toLocaleDateString('th-TH', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                          {order.deliveryInfo?.deliveryTime && (
+                            <span className="block text-xs text-blue-600 mt-1">เวลา {order.deliveryInfo.deliveryTime}</span>
+                          )}
+                        </>
+                      ) : '-'}
                     </td>
                     <td className="px-6 py-4 text-sm text-right font-medium text-gray-800">
                       ฿{order.orderSummary?.totalPrice?.toLocaleString()}
@@ -335,26 +340,48 @@ const AdminPage = () => {
                         type="button"
                       >
                         {openOrderId === order.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        <span className="font-medium">ดูรายการสินค้า</span>
+                        <span className="font-medium text-xs whitespace-nowrap">ดูรายการ</span>
                       </button>
                       <div
                         className={`overflow-hidden transition-all duration-300 ${openOrderId === order.id ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}`}
                         style={{ pointerEvents: openOrderId === order.id ? 'auto' : 'none' }}
                       >
                         {openOrderId === order.id && (
-                          <ul className="space-y-1 bg-blue-50 rounded-xl p-4 shadow-inner border border-blue-100">
-                            {order.orderSummary?.items?.map((item, idx) => (
-                              <li key={idx} className="flex items-center gap-2 border-b last:border-b-0 py-1">
-                                <span className="text-blue-400">•</span>
-                                <span className="font-semibold">{item.name}</span>
-                                <span className="text-gray-400">x</span>
-                                <span>{item.quantity}</span>
-                                <span className="text-gray-400">(฿{item.total?.toLocaleString()})</span>
-                              </li>
-                            ))}
-                          </ul>
+                          <>
+                            <ul className="space-y-1 bg-blue-50 rounded-xl p-4 shadow-inner border border-blue-100">
+                              {order.orderSummary?.items?.map((item, idx) => (
+                                <li key={idx} className="flex items-center gap-2 border-b last:border-b-0 py-1">
+                                  <span className="text-blue-400">•</span>
+                                  <span className="font-semibold">{item.name}</span>
+                                  <span className="text-gray-400">x</span>
+                                  <span>{item.quantity}</span>
+                                  <span className="text-gray-400">(฿{item.total?.toLocaleString()})</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="mt-4 flex justify-center">
+                              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 rounded-xl px-4 py-2 shadow font-semibold text-base">
+                                <TrendingUp size={18} className="text-blue-500" />
+                                <span>จำนวนสินค้ารวม:</span>
+                                <span className="text-blue-900 font-bold">{order.orderSummary?.totalItems}</span>
+                              </div>
+                            </div>
+                          </>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        className="inline-flex items-center justify-center p-2 rounded-full hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        onClick={() => {
+                          localStorage.setItem('edit_order_data', JSON.stringify(order));
+                          router.push(`/Admin/edit/${order.id}`);
+                        }}
+                        title="แก้ไขออเดอร์"
+                        type="button"
+                      >
+                        <Pencil size={18} className="text-blue-500" />
+                      </button>
                     </td>
                   </tr>
                 ))}
