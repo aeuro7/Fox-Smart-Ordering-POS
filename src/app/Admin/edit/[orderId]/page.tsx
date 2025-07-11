@@ -30,8 +30,9 @@ interface Order {
   };
 }
 
+// แก้ไขตรงนี้ - เปลี่ยน params ให้เป็น Promise
 type EditOrderPageProps = {
-  params: { orderId: string }
+  params: Promise<{ orderId: string }>
 }
 
 export default function EditOrderPage({ params }: EditOrderPageProps) {
@@ -39,6 +40,7 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
   const [formData, setFormData] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [orderId, setOrderId] = useState<string>(''); // เพิ่ม state สำหรับเก็บ orderId
   const router = useRouter();
 
   // สินค้าทั้งหมดที่เลือกเพิ่มได้
@@ -55,6 +57,19 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<number>(products[0].id);
   const [selectedQty, setSelectedQty] = useState<number>(1);
+
+  // เพิ่ม useEffect เพื่อ resolve params
+  useEffect(() => {
+    const getOrderId = async () => {
+      try {
+        const resolvedParams = await params;
+        setOrderId(resolvedParams.orderId);
+      } catch (error) {
+        console.error('Error resolving params:', error);
+      }
+    };
+    getOrderId();
+  }, [params]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -169,8 +184,6 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
     if (!formData) return;
     setSaving(true);
     try {
-      // อัปเดตเฉพาะ deliveryInfo และ orderSummary เท่านั้น
-      // จะไม่แตะต้อง id และวันที่สร้าง (createdAt หรือฟิลด์อื่นๆ ที่ไม่ได้ระบุไว้)
       await updateDoc(doc(db, 'orders', formData.id), {
         deliveryInfo: formData.deliveryInfo,
         orderSummary: formData.orderSummary,
@@ -544,4 +557,4 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
       </div>
     </div>
   );
-};
+}
