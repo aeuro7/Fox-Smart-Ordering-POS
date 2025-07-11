@@ -30,11 +30,11 @@ interface Order {
   };
 }
 
-type Props = {
+type EditOrderPageProps = {
   params: { orderId: string }
 }
 
-export default function EditOrderPage({ params }: Props) {
+export default function EditOrderPage({ params }: EditOrderPageProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [formData, setFormData] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
