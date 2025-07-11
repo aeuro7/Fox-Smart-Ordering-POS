@@ -6,6 +6,23 @@ import { useRouter } from 'next/navigation';
 import { db } from '../../firebase/config';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
 
+// ปรับ getNext7Days ให้ label เป็น dd/mm/yyyy แต่ value เป็น yyyy-mm-dd
+const getNext7Days = () => {
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear();
+    days.push({
+      value: `${year}-${month}-${day}`,
+      label: `${day}/${month}/${year}`
+    });
+  }
+  return days;
+};
+
 const OrderSummaryPage = () => {
   const { orderSummary } = useOrderContext();
   const router = useRouter();
@@ -22,6 +39,24 @@ const OrderSummaryPage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState<'success' | 'error'>('success');
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const next7Days = getNext7Days();
+  const dateDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // ปิด dropdown เมื่อคลิกข้างนอก
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dateDropdownRef.current && !dateDropdownRef.current.contains(event.target as Node)) {
+        setShowDateDropdown(false);
+      }
+    };
+    if (showDateDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDateDropdown]);
 
   useEffect(() => {
     if (!orderSummary) {
@@ -278,22 +313,35 @@ const OrderSummaryPage = () => {
                   <span className="inline-block mr-1">🗓️</span>
                   วันที่ต้องการจัดส่ง <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="date"
-                  value={deliveryInfo.deliveryDate}
-                  onChange={e => handleInputChange('deliveryDate', e.target.value)}
-                  min={(() => {
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    return tomorrow.toISOString().split('T')[0];
-                  })()}
-                  max={(() => {
-                    const maxDate = new Date();
-                    maxDate.setDate(maxDate.getDate() + 7);
-                    return maxDate.toISOString().split('T')[0];
-                  })()}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 touch-manipulation"
-                />
+                <div className="relative" ref={dateDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowDateDropdown((prev) => !prev)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-left focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 flex justify-between items-center"
+                  >
+                    {deliveryInfo.deliveryDate || 'เลือกวันที่'}
+                    <svg className={`w-5 h-5 ml-2 transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                  {showDateDropdown && (
+                    <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      <div className="flex flex-col">
+                        {next7Days.map((day) => (
+                          <button
+                            key={day.value}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange('deliveryDate', day.value);
+                              setShowDateDropdown(false);
+                            }}
+                            className={`px-4 py-2 text-left hover:bg-blue-50 transition-colors duration-150 ${deliveryInfo.deliveryDate === day.value ? 'bg-blue-100 font-bold' : ''}`}
+                          >
+                            {day.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               {/* เวลา */}
               <div>
