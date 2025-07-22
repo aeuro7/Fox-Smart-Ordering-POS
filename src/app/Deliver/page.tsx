@@ -1,9 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { db } from '../firebase/config';
 import Swal from 'sweetalert2';
-import AdminNav from '../../components/AdminNav';
+import AdminNav from '../components/AdminNav';
 
 interface OrderInfo {
   customerName?: string;
