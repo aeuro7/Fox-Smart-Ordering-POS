@@ -28,6 +28,7 @@ interface Order {
     totalItems: number;
     totalPrice: number;
   };
+  deliveryStatus?: string; // เพิ่ม field สถานะจัดส่ง
 }
 
 // แก้ไขตรงนี้ - เปลี่ยน params ให้เป็น Promise
@@ -86,16 +87,23 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
     fetchOrder();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (!formData) return;
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      deliveryInfo: {
-        ...formData.deliveryInfo,
-        [name]: value,
-      },
-    });
+    if (name === 'deliveryStatus') {
+      setFormData({
+        ...formData,
+        deliveryStatus: value,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        deliveryInfo: {
+          ...formData.deliveryInfo,
+          [name]: value,
+        },
+      });
+    }
   };
 
   const handleItemChange = (idx: number, value: number) => {
@@ -187,6 +195,7 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
       await updateDoc(doc(db, 'orders', formData.id), {
         deliveryInfo: formData.deliveryInfo,
         orderSummary: formData.orderSummary,
+        deliveryStatus: formData.deliveryStatus || 'pending', // เพิ่มบันทึกสถานะจัดส่ง
       });
       localStorage.setItem('edit_order_data', JSON.stringify(formData));
       setOrder(formData);
@@ -342,6 +351,18 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
                       className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-800"
                     />
                   </div>
+                </div>
+                <div className="relative mt-5">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">สถานะจัดส่ง</label>
+                  <select
+                    name="deliveryStatus"
+                    value={formData.deliveryStatus || 'pending'}
+                    onChange={handleChange}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-800"
+                  >
+                    <option value="pending">ยังไม่จัดส่ง</option>
+                    <option value="done">จัดส่งแล้ว</option>
+                  </select>
                 </div>
               </div>
             </div>

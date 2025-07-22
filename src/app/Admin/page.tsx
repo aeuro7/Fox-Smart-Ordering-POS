@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { Search, Filter, Calendar, Package, DollarSign, TrendingUp, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
+import { FaCheckCircle, FaSpinner, FaTimesCircle } from 'react-icons/fa';
 import AdminNav from '../components/AdminNav';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
@@ -32,6 +33,7 @@ interface Order {
   };
   user_doc_id: string;
   my_order_id?: string;
+  deliveryStatus?: string; // เพิ่ม field สถานะจัดส่ง
 }
 
 const AdminPage = () => {
@@ -43,6 +45,7 @@ const AdminPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'deliveryDate' | 'createdAt'>('deliveryDate'); // เพิ่ม state สำหรับการเรียง
   const router = useRouter();
 
   // เช็ค user role ที่จุดเริ่มต้น ก่อนเรียก API
@@ -91,6 +94,7 @@ const AdminPage = () => {
             orderSummary: d.orderSummary,
             user_doc_id: d.user_doc_id,
             my_order_id: d.my_order_id,
+            deliveryStatus: d.deliveryStatus, // ดึงสถานะจัดส่ง
           };
         });
         setOrders(data);
@@ -103,7 +107,7 @@ const AdminPage = () => {
 
   useEffect(() => {
     filterOrders();
-  }, [searchTerm, dateFilter, startDate, endDate, orders]);
+  }, [searchTerm, dateFilter, startDate, endDate, orders, sortBy]); // เพิ่ม sortBy ใน dependency
 
   const filterOrders = () => {
     let filtered = [...orders];
@@ -153,6 +157,21 @@ const AdminPage = () => {
         break;
     }
 
+    // Sort
+    filtered.sort((a, b) => {
+      if (sortBy === 'deliveryDate') {
+        // ถ้าไม่มีวันส่ง ให้ถือว่าอยู่ล่างสุด
+        const aDate = a.deliveryInfo?.deliveryDate ? new Date(a.deliveryInfo.deliveryDate) : new Date(8640000000000000);
+        const bDate = b.deliveryInfo?.deliveryDate ? new Date(b.deliveryInfo.deliveryDate) : new Date(8640000000000000);
+        return aDate.getTime() - bDate.getTime(); // วันส่งเร็วสุดอยู่บนสุด
+      } else {
+        // createdAt
+        const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+        const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+        return bDate.getTime() - aDate.getTime(); // ใหม่สุดอยู่บนสุด
+      }
+    });
+
     setFilteredOrders(filtered);
   };
 
@@ -178,9 +197,7 @@ const AdminPage = () => {
       
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
 
-
-
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w mx-10">
         {/* Header */}
         <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
@@ -242,6 +259,23 @@ const AdminPage = () => {
                 </select>
               </div>
             </div>
+            {/* ปุ่มเรียงลำดับ */}
+            <div className="flex gap-2 mt-2">
+              <button
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200 ${sortBy === 'deliveryDate' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                onClick={() => setSortBy('deliveryDate')}
+                type="button"
+              >
+                เรียงตามวันส่ง (ด่วนสุดบนสุด)
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200 ${sortBy === 'createdAt' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                onClick={() => setSortBy('createdAt')}
+                type="button"
+              >
+                เรียงตามวันที่สร้าง (ใหม่สุดบนสุด)
+              </button>
+            </div>
             
             {/* Custom Date Range */}
             {dateFilter === 'custom' && (
@@ -285,19 +319,21 @@ const AdminPage = () => {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">รหัสออเดอร์</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">วันที่สร้าง</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">ชื่อผู้รับ</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">ที่อยู่</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">เบอร์โทร</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">วันส่ง</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600">ราคารวม</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">รายการสินค้า</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">แก้ไข</th>
-                </tr>
-              </thead>
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">รหัสออเดอร์</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">วันที่สร้าง</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">ชื่อผู้รับ</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">ที่อยู่</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">เบอร์โทร</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">วันส่ง</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">สถานะจัดส่ง</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600">ราคารวม</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">รายการสินค้า</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">แก้ไข</th>
+              </tr>
+            </thead>
+
               <tbody className="divide-y divide-gray-200">
                 {filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors duration-200">
@@ -311,7 +347,9 @@ const AdminPage = () => {
                       {order.deliveryInfo?.customerName}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {order.deliveryInfo?.address}
+                      <div className="max-w-xs overflow-hidden text-ellipsis whitespace-pre-line line-clamp-3">
+                        {order.deliveryInfo?.address}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {order.deliveryInfo?.phoneNumber}
@@ -329,6 +367,13 @@ const AdminPage = () => {
                           )}
                         </>
                       ) : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-center">
+                      {order.deliveryStatus === 'done' ? (
+                        <FaCheckCircle className="inline-flex text-green-600" size={24} />
+                      ) : (
+                        <FaTimesCircle className="inline-flex text-yellow-500" size={24} />
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-right font-medium text-gray-800">
                       ฿{order.orderSummary?.totalPrice?.toLocaleString()}

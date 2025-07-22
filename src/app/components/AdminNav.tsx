@@ -59,6 +59,7 @@ const AdminNav = () => {
   const adminNavItems = [
     { path: '/Admin', label: 'แดชบอร์ด', icon: AiOutlineDashboard },
     { path: '/Admin/byday', label: 'รายงานรายวัน', icon: AiOutlineCalendar },
+    { path: '/Admin/Deliver', label: 'อัปเดตสถานะจัดส่ง', icon: RiTBoxLine },
   ];
 
   return (

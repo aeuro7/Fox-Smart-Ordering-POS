@@ -40,8 +40,15 @@ const OrderSummaryPage = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState<'success' | 'error'>('success');
   const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false); // เพิ่ม state สำหรับเวลา
   const next7Days = getNext7Days();
   const dateDropdownRef = React.useRef<HTMLDivElement>(null);
+  const timeDropdownRef = React.useRef<HTMLDivElement>(null); // เพิ่ม ref สำหรับเวลา
+  const timeOptions = [
+    { value: '10:00', label: '10:00' },
+    { value: '12:00', label: '12:00' },
+    // เพิ่มช่วงเวลาอื่นๆ ได้ที่นี่
+  ];
 
   // ปิด dropdown เมื่อคลิกข้างนอก
   useEffect(() => {
@@ -57,6 +64,21 @@ const OrderSummaryPage = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showDateDropdown]);
+
+  // ปิด dropdown เวลาเมื่อคลิกข้างนอก
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (timeDropdownRef.current && !timeDropdownRef.current.contains(event.target as Node)) {
+        setShowTimeDropdown(false);
+      }
+    };
+    if (showTimeDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showTimeDropdown]);
 
   useEffect(() => {
     if (!orderSummary) {
@@ -153,6 +175,7 @@ const OrderSummaryPage = () => {
           deliveryTime: deliveryInfo.deliveryTime,
         },
         orderSummary: { ...orderSummary },
+        deliveryStatus: 'pending', // เพิ่มสถานะจัดส่ง
         createdAt: Timestamp.now(),
       });
 
@@ -349,15 +372,35 @@ const OrderSummaryPage = () => {
                   <span className="inline-block mr-1">⏰</span>
                   เวลาที่ต้องการจัดส่ง <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={deliveryInfo.deliveryTime}
-                  onChange={e => handleInputChange('deliveryTime', e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 touch-manipulation"
-                >
-                  <option value="">เลือกเวลา</option>
-                  <option value="10:00">10:00</option>
-                  <option value="12:00">12:00</option>
-                </select>
+                <div className="relative" ref={timeDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowTimeDropdown((prev) => !prev)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-left focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-900 placeholder-gray-500 flex justify-between items-center"
+                  >
+                    {deliveryInfo.deliveryTime || 'เลือกเวลา'}
+                    <svg className={`w-5 h-5 ml-2 transition-transform ${showTimeDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                  {showTimeDropdown && (
+                    <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      <div className="flex flex-col">
+                        {timeOptions.map((time) => (
+                          <button
+                            key={time.value}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange('deliveryTime', time.value);
+                              setShowTimeDropdown(false);
+                            }}
+                            className={`px-4 py-2 text-left hover:bg-blue-50 transition-colors duration-150 ${deliveryInfo.deliveryTime === time.value ? 'bg-blue-100 font-bold' : ''}`}
+                          >
+                            {time.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
