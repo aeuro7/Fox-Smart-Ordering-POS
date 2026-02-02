@@ -1,38 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🦊 Fox Smart Ordering POS
 
-## Getting Started
+A modern, intelligent Point of Sale (POS) system designed for easy order management, customer tracking, and administrative control.
 
-First, run the development server:
+🌐 Live Demo:  
+👉 https://foxyjoe.vercel.app/home
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 👥 Customer Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🛒 **Easy Order Placement**  
+  Browse products and place orders with an intuitive interface.
 
-## Learn More
+- 📄 **Order History**  
+  View and track all previous orders in one place.
 
-To learn more about Next.js, take a look at the following resources:
+- ⚙️ **Account Management**  
+  Manage personal information and delivery addresses.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- 🚀 **No Login Required (Demo Mode)**  
+  Try all features instantly without registration.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 👨‍💼 Admin Features
 
-## Deploy on Vercel
+- 📊 **Dashboard Overview**  
+  Monitor orders, sales, and business metrics at a glance.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 📅 **Daily Reports**  
+  View detailed order summaries organized by delivery date.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Receipt_print_web
-# Foxy9
+- 🚚 **Delivery Status Management**  
+  Update and track order delivery status in real-time.
+
+- 💰 **Sales Analytics**  
+  Track total revenue, order counts, and product statistics.
+
+---
+
+## 🎯 Key Highlights
+
+- **Smart Order System** — Streamlined ordering process from selection to delivery
+- **Real-time Updates** — Instant order status tracking
+- **Responsive Design** — Works seamlessly on desktop and mobile devices
+- **Firebase Integration** — Secure cloud-based data storage
+- **Admin Control Panel** — Comprehensive management tools for business owners
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 16, React 19, TypeScript
+- **Styling:** Tailwind CSS 4
+- **Backend:** Firebase (Firestore, Authentication)
+- **UI Components:** React Icons, Lucide React
+- **Notifications:** SweetAlert2
+- **Charts:** Chart.js, React-Chartjs-2
+- **PDF Generation:** jsPDF, @react-pdf/renderer
+
+---
+
+## 🎮 Demo Features
+
+### Customer Side
+- Browse product catalog
+- Add items to cart
+- Place orders with delivery information
+- View order history
+- Manage account settings
+
+### Admin Side
+- View all orders in dashboard
+- Filter orders by delivery date
+- Update delivery status
+- Generate daily reports
+- Export data to PDF
+
+---
+
+## 🔗 Demo
+
+Try it here:  
+👉 https://foxyjoe.vercel.app/home
+
+**Note:** This is a demo version. No login required, and data is not permanently stored in the database.
+
+---
+
+## 👨💻 Developer
+
+Developed by Tibet Charoensripaiboon
+
+---
+
+## 📝 License
+
+This project is for demonstration purposes.
