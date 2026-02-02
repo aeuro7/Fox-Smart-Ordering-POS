@@ -30,35 +30,34 @@ const UpdateOrderStatus = () => {
     }
   }, [fullOrder?.items]);
 
-  // ตรวจสอบ role admin ก่อนแสดงผล
-  useEffect(() => {
-    const checkAdminRole = () => {
-      const userRole = localStorage.getItem('user_role');
-      const userToken = localStorage.getItem('user_token');
-      if (!userToken || userRole !== 'admin') {
-        localStorage.clear();
-        sessionStorage.clear();
-        Swal.fire({
-          title: 'ไม่มีสิทธิ์เข้าถึง',
-          text: 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ กรุณาเข้าสู่ระบบด้วยบัญชีผู้ดูแลระบบ',
-          icon: 'error',
-          confirmButtonText: 'ไปหน้าเข้าสู่ระบบ',
-          customClass: {
-            popup: 'rounded-2xl',
-            confirmButton: 'swal2-theme-confirm',
-            title: 'text-red-700',
-            icon: 'text-red-500'
-          },
-          buttonsStyling: false
-        }).then(() => {
-          router.push('/login');
-        });
-        return false;
-      }
-      return true;
-    };
-    checkAdminRole();
-  }, [router]);
+  // useEffect(() => {
+  //   const checkAdminRole = () => {
+  //     const userRole = localStorage.getItem('user_role');
+  //     const userToken = localStorage.getItem('user_token');
+  //     if (!userToken || userRole !== 'admin') {
+  //       localStorage.clear();
+  //       sessionStorage.clear();
+  //       Swal.fire({
+  //         title: 'ไม่มีสิทธิ์เข้าถึง',
+  //         text: 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ กรุณาเข้าสู่ระบบด้วยบัญชีผู้ดูแลระบบ',
+  //         icon: 'error',
+  //         confirmButtonText: 'ไปหน้าเข้าสู่ระบบ',
+  //         customClass: {
+  //           popup: 'rounded-2xl',
+  //           confirmButton: 'swal2-theme-confirm',
+  //           title: 'text-red-700',
+  //           icon: 'text-red-500'
+  //         },
+  //         buttonsStyling: false
+  //       }).then(() => {
+  //         router.push('/login');
+  //       });
+  //       return false;
+  //     }
+  //     return true;
+  //   };
+  //   checkAdminRole();
+  // }, [router]);
 
   // ค้นหาข้อมูลออเดอร์เมื่อกรอก ID
   const searchOrder = async () => {
@@ -121,12 +120,12 @@ const UpdateOrderStatus = () => {
       // ค้นหา document ID จาก my_order_id
       const q = query(collection(db, 'orders'), where('my_order_id', '==', orderId));
       const querySnapshot = await getDocs(q);
-      
+
       if (!querySnapshot.empty) {
         const orderDoc = querySnapshot.docs[0];
         const orderRef = doc(db, 'orders', orderDoc.id);
         await updateDoc(orderRef, { deliveryStatus: status });
-        
+
         Swal.fire({
           title: 'อัปเดตสำเร็จ!',
           html: `
@@ -197,7 +196,7 @@ const UpdateOrderStatus = () => {
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">ค้นหาออเดอร์</h2>
               </div>
-              
+
               <div className="relative">
                 <input
                   type="text"
@@ -239,14 +238,12 @@ const UpdateOrderStatus = () => {
                     <div className="mt-3 pt-3 border-t border-blue-200 flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600 mb-1">สถานะปัจจุบัน</p>
-                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                          orderInfo.deliveryStatus === 'done' 
-                            ? 'bg-green-100 text-green-700' 
+                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${orderInfo.deliveryStatus === 'done'
+                            ? 'bg-green-100 text-green-700'
                             : 'bg-amber-100 text-amber-700'
-                        }`}>
-                          <div className={`w-2 h-2 rounded-full ${
-                            orderInfo.deliveryStatus === 'done' ? 'bg-green-500' : 'bg-amber-500'
-                          }`}></div>
+                          }`}>
+                          <div className={`w-2 h-2 rounded-full ${orderInfo.deliveryStatus === 'done' ? 'bg-green-500' : 'bg-amber-500'
+                            }`}></div>
                           {orderInfo.deliveryStatus === 'done' ? 'จัดส่งแล้ว' : 'ยังไม่จัดส่ง'}
                         </span>
                       </div>
@@ -348,7 +345,7 @@ const UpdateOrderStatus = () => {
                       {/* Timestamps */}
                       <div className="bg-white rounded-xl border border-gray-200 p-4">
                         <div className="flex items-center justify-between text-sm">
-                        <div>
+                          <div>
                             <p className="text-gray-600">วันที่สั่งซื้อ</p>
                             <p className="font-medium">
                               {new Date(fullOrder.createdAt?.seconds * 1000 || fullOrder.createdAt).toLocaleDateString('en-GB')} {new Date(fullOrder.createdAt?.seconds * 1000 || fullOrder.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
@@ -388,11 +385,10 @@ const UpdateOrderStatus = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <button
                     onClick={() => setStatus('done')}
-                    className={`relative p-6 rounded-xl border-2 transition-all duration-200 ${
-                      status === 'done' 
-                        ? 'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50' 
+                    className={`relative p-6 rounded-xl border-2 transition-all duration-200 ${status === 'done'
+                        ? 'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50'
                         : 'border-gray-200 hover:border-green-300 bg-white'
-                    }`}
+                      }`}
                   >
                     {status === 'done' && (
                       <div className="absolute top-3 right-3">
@@ -404,9 +400,8 @@ const UpdateOrderStatus = () => {
                       </div>
                     )}
                     <div className="flex flex-col items-center gap-3">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                        status === 'done' ? 'bg-green-100' : 'bg-gray-100'
-                      }`}>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${status === 'done' ? 'bg-green-100' : 'bg-gray-100'
+                        }`}>
                         <svg className={`w-8 h-8 ${status === 'done' ? 'text-green-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -419,11 +414,10 @@ const UpdateOrderStatus = () => {
 
                   <button
                     onClick={() => setStatus('pending')}
-                    className={`relative p-6 rounded-xl border-2 transition-all duration-200 ${
-                      status === 'pending' 
-                        ? 'border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50' 
+                    className={`relative p-6 rounded-xl border-2 transition-all duration-200 ${status === 'pending'
+                        ? 'border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50'
                         : 'border-gray-200 hover:border-amber-300 bg-white'
-                    }`}
+                      }`}
                   >
                     {status === 'pending' && (
                       <div className="absolute top-3 right-3">
@@ -435,9 +429,8 @@ const UpdateOrderStatus = () => {
                       </div>
                     )}
                     <div className="flex flex-col items-center gap-3">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                        status === 'pending' ? 'bg-amber-100' : 'bg-gray-100'
-                      }`}>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${status === 'pending' ? 'bg-amber-100' : 'bg-gray-100'
+                        }`}>
                         <svg className={`w-8 h-8 ${status === 'pending' ? 'text-amber-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>

@@ -26,7 +26,7 @@ const getNext7Days = () => {
 const OrderSummaryPage = () => {
   const { orderSummary } = useOrderContext();
   const router = useRouter();
-  
+
   const [deliveryInfo, setDeliveryInfo] = useState({
     customerName: '',
     phoneNumber: '',
@@ -34,7 +34,7 @@ const OrderSummaryPage = () => {
     deliveryDate: '',
     deliveryTime: '' // เพิ่มช่องเวลา
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
@@ -87,10 +87,10 @@ const OrderSummaryPage = () => {
   }, [orderSummary, router]);
 
   useEffect(() => {
-    const token = localStorage.getItem('user_token');
-    if (!token) {
-      router.replace('/login');
-    }
+    // const token = localStorage.getItem('user_token');
+    // if (!token) {
+    //   router.replace('/login');
+    // }
   }, [router]);
 
   // useEffect สำหรับ localStorage โดยเฉพาะ (key แบบ user)
@@ -149,35 +149,32 @@ const OrderSummaryPage = () => {
     }
 
     setIsSubmitting(true);
-    
-    // ดึง user_doc_id จาก localStorage
-    let userDocId = '';
-    if (typeof window !== 'undefined') {
-      userDocId = localStorage.getItem('user_doc_id') || '';
-    }
+
+    // let userDocId = '';
+    // if (typeof window !== 'undefined') {
+    //   userDocId = localStorage.getItem('user_doc_id') || '';
+    // }
 
     try {
-      // สร้าง my_order_id จากวันเวลาปัจจุบัน (yyMMddHHmmss)
-      const now = new Date();
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      const yearShort = now.getFullYear().toString().slice(-2);
-      const myOrderId = `${yearShort}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-      
-      // เพิ่มข้อมูลลง Firestore
-      await addDoc(collection(db, 'orders'), {
-        user_doc_id: userDocId,
-        my_order_id: myOrderId,
-        deliveryInfo: {
-          customerName: deliveryInfo.customerName,
-          phoneNumber: deliveryInfo.phoneNumber,
-          address: deliveryInfo.address,
-          deliveryDate: deliveryInfo.deliveryDate,
-          deliveryTime: deliveryInfo.deliveryTime,
-        },
-        orderSummary: { ...orderSummary },
-        deliveryStatus: 'pending', // เพิ่มสถานะจัดส่ง
-        createdAt: Timestamp.now(),
-      });
+      // const now = new Date();
+      // const pad = (n: number) => n.toString().padStart(2, '0');
+      // const yearShort = now.getFullYear().toString().slice(-2);
+      // const myOrderId = `${yearShort}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+      // await addDoc(collection(db, 'orders'), {
+      //   user_doc_id: userDocId,
+      //   my_order_id: myOrderId,
+      //   deliveryInfo: {
+      //     customerName: deliveryInfo.customerName,
+      //     phoneNumber: deliveryInfo.phoneNumber,
+      //     address: deliveryInfo.address,
+      //     deliveryDate: deliveryInfo.deliveryDate,
+      //     deliveryTime: deliveryInfo.deliveryTime,
+      //   },
+      //   orderSummary: { ...orderSummary },
+      //   deliveryStatus: 'pending',
+      //   createdAt: Timestamp.now(),
+      // });
 
       const finalOrderSummary = `สั่งซื้อสำเร็จ\nกรุณารอการติดต่อกลับ`;
       setPopupType('success');
@@ -222,7 +219,7 @@ const OrderSummaryPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md">
-        
+
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -277,7 +274,7 @@ const OrderSummaryPage = () => {
               <LocationIcon className="w-6 h-6 text-blue-600" />
               ข้อมูลการจัดส่ง
             </h3>
-            
+
             <div className="space-y-4">
               {/* ชื่อผู้สั่ง */}
               <div>
@@ -418,11 +415,10 @@ const OrderSummaryPage = () => {
             <button
               onClick={handleConfirmOrder}
               disabled={isSubmitting}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation ${
-                isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
-                  : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:from-green-700 active:to-emerald-800 text-white hover:shadow-lg'
-              }`}
+              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation ${isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:from-green-700 active:to-emerald-800 text-white hover:shadow-lg'
+                }`}
             >
               {isSubmitting ? (
                 <>
@@ -450,7 +446,7 @@ const OrderSummaryPage = () => {
               ) : (
                 <div className="text-5xl mb-2">❌</div>
               )}
-              <div className="whitespace-pre-line text-gray-800 text-base mb-4" style={{wordBreak: 'break-word'}}>{popupMessage}</div>
+              <div className="whitespace-pre-line text-gray-800 text-base mb-4" style={{ wordBreak: 'break-word' }}>{popupMessage}</div>
               <button
                 className={`mt-2 px-6 py-2 rounded-full font-semibold shadow transition-all duration-200 ${popupType === 'success' ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`}
                 onClick={() => {

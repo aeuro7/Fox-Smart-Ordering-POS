@@ -128,14 +128,14 @@ const ProductOrderPage = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('user_token');
-    if (!token) {
-      router.replace('/login');
-    }
+    // const token = localStorage.getItem('user_token');
+    // if (!token) {
+    //   router.replace('/login');
+    // }
   }, [router]);
 
   return (
-    
+
 
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Navbar />
@@ -207,10 +207,10 @@ const ProductOrderPage = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-lg md:text-2xl font-bold text-green-600">
-                    {/* <span className="text-xs text-gray-400 ml-1">ราคา </span> */}
+                      {/* <span className="text-xs text-gray-400 ml-1">ราคา </span> */}
                       {product.price}฿
-                       {/* <span className="text-xs text-gray-400 ml-1">ต่อชิ้น</span> */}
-                    </p>                    
+                      {/* <span className="text-xs text-gray-400 ml-1">ต่อชิ้น</span> */}
+                    </p>
                   </div>
                 </div>
 
@@ -304,8 +304,8 @@ const ProductOrderPage = () => {
               type="submit"
               disabled={isSubmitting || totalItems === 0}
               className={`w-full py-4 px-6 font-semibold text-base md:text-lg rounded-full shadow-lg transition-all duration-300 ${isSubmitting || totalItems === 0
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:shadow-xl active:scale-98'
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:shadow-xl active:scale-98'
                 }`}
             >
               {isSubmitting ? (
